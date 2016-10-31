@@ -4,42 +4,43 @@
 * @flow
 */
 
-import React, { Component } from 'react'
+import React, { Component } from 'react';
 import {
   AppRegistry,
   StyleSheet,
   Text,
   View,
   TouchableOpacity,
-} from 'react-native'
+  Dimensions,
+} from 'react-native';
 
-const BOARD_WIDTH = 360
-const BOARD_HEIGHT = 600
-const TILE_SIZE = 20
+const TILE_SIZE = 20;
+const BOARD_WIDTH = (Dimensions.get('window').width - 20) - (Dimensions.get('window').width % TILE_SIZE);
+const BOARD_HEIGHT = (Dimensions.get('window').height - 60) - (Dimensions.get('window').height % TILE_SIZE);
 
 class Tile extends Component {
   constructor(props) {
-    super(props)
+    super(props);
 
-    this.onTileChange = this.onTileChange.bind(this)
+    this.onTileChange = this.onTileChange.bind(this);
   }
 
   shouldComponentUpdate(nextProps) {
-    //Update component only if cell's value changed
-    return (this.props.value !== nextProps.value)
+    // Update component only if cell's value changed
+    return (this.props.value !== nextProps.value);
   }
 
   onTileChange () {
-    this.props.handleTileTouch(this.props.x, this.props.y)
+    this.props.handleTileTouch(this.props.x, this.props.y);
   }
 
   render () {
-    let style = this.props.value ? styles.tileActive : styles.tileUnactive
+    let style = this.props.value ? styles.tileActive : styles.tileUnactive;
     return (
       <TouchableOpacity onPress={this.onTileChange}>
         <View style={style}></View>
       </TouchableOpacity>
-    )
+    );
   }
 }
 
@@ -48,12 +49,18 @@ class Row extends Component {
     return (
       <View style={styles.row}>
         {
-          this.props.rowArr.map(
-            (element, index) => <Tile key = {index} value = {this.props.rowArr[index]} x = {this.props.x} y = {index} handleTileTouch = {this.props.handleTileTouch}/>
+          this.props.rowArr.map( (element, index) =>
+            <Tile
+              key={index}
+              value={this.props.rowArr[index]}
+              x={this.props.x}
+              y={index}
+              handleTileTouch={this.props.handleTileTouch}
+            />
           )
         }
       </View>
-    )
+    );
   }
 }
 
@@ -62,111 +69,35 @@ class Board extends Component {
     return (
       <View style = {styles.board}>
         {
-          this.props.grid.map(
-            (element, index) => <Row rowArr = {element} key={index} x = {index} handleTileTouch = {this.props.handleTileTouch}/>)
+          this.props.grid.map((element, index) =>
+            <Row
+              rowArr={element}
+              key={index}
+              x={index}
+              handleTileTouch={this.props.handleTileTouch}
+            />)
         }
       </View>
-    )
+    );
   }
 }
 
-class ResetButton extends Component {
-  constructor(props) {
-    super(props)
-
-    this.onReset = this.onReset.bind(this)
-  }
-
-  onReset() {
-    this.props.handleReset()
-  }
-
-  render() {
-    return (
-      <TouchableOpacity onPress = {this.onReset}>
-        <View style = {styles.tool}>
-          <Text style = {styles.toolText}>Reset</Text>
-        </View>
-      </TouchableOpacity>
-    )
-  }
-}
-
-class RandomButton extends Component {
-  constructor(props) {
-    super(props)
-
-    this.onRandom = this.onRandom.bind(this)
-  }
-
-  onRandom() {
-    this.props.handleRandom()
-  }
-
-  render() {
-    return (
-      <TouchableOpacity onPress = {this.onRandom}>
-        <View style = {styles.tool}>
-          <Text style = {styles.toolText}>Random</Text>
-        </View>
-      </TouchableOpacity>
-    )
-  }
-}
-
-class PauseButton extends Component {
-  constructor(props) {
-    super(props)
-
-    this.onPause = this.onPause.bind(this)
-  }
-
-  onPause() {
-    this.props.handlePause()
-  }
-
-  render() {
-    return (
-      <TouchableOpacity onPress = {this.onPause}>
-        <View style = {styles.tool}>
-          <Text style = {styles.toolText}>Pause</Text>
-        </View>
-      </TouchableOpacity>
-    )
-  }
-}
-
-class PlayButton extends Component {
-
-  constructor(props) {
-    super(props)
-
-    this.onRun = this.onRun.bind(this)
-  }
-
-  onRun() {
-    this.props.handleRun()
-  }
-
-  render() {
-    return (
-      <TouchableOpacity onPress = {this.onRun}>
-        <View style = {styles.tool}>
-          <Text style = {styles.toolText}>Play</Text>
-        </View>
-      </TouchableOpacity>
-    )
-  }
-}
+const Button = (props) => (
+  <TouchableOpacity onPress = {props.onPress}>
+    <View style={props.style}>
+      <Text style={props.textStyle}> {props.text} </Text>
+    </View>
+  </TouchableOpacity>
+);
 
 class ToolsBar extends Component {
   render() {
     return (
       <View style = {styles.toolsBar}>
-      <ResetButton grid = {this.props.grid} handleReset = {this.props.handleReset}/>
-      <RandomButton grid = {this.props.grid} handleRandom = {this.props.handleRandom}/>
-      <PauseButton handlePause = {this.props.handlePause}/>
-      <PlayButton handleRun = {this.props.handleRun}/>
+        <Button onPress={this.props.handleReset} style={styles.tool} textStyle={styles.toolText} text={'Reset'} />
+        <Button onPress={this.props.handleRandom} style={styles.tool} textStyle={styles.toolText} text={'Random'} />
+        <Button onPress={this.props.handlePause} style={styles.tool} textStyle={styles.toolText} text={'Pause'} />
+        <Button onPress={this.props.handleRun} style={styles.tool} textStyle={styles.toolText} text={'Play'} />
       </View>
     )
   }
@@ -174,114 +105,120 @@ class ToolsBar extends Component {
 
 export default class Conways extends Component {
   constructor(props) {
-    super(props)
+    super(props);
 
     this.state = {
       grid: this.getEmptyGrid(),
-    }
+    };
 
-    this.handleTileTouch = this.handleTileTouch.bind(this)
-    this.handleReset = this.handleReset.bind(this)
-    this.handleRun = this.handleRun.bind(this)
-    this.handlePause = this.handlePause.bind(this)
-    this.handleRandom = this.handleRandom.bind(this)
-    this.getEmptyGrid = this.getEmptyGrid.bind(this)
+    this.handleTileTouch = this.handleTileTouch.bind(this);
+    this.handleReset = this.handleReset.bind(this);
+    this.handleRun = this.handleRun.bind(this);
+    this.handlePause = this.handlePause.bind(this);
+    this.handleRandom = this.handleRandom.bind(this);
+    this.getEmptyGrid = this.getEmptyGrid.bind(this);
   }
 
   getEmptyGrid() {
-    let grid = []
+    let grid = [];
 
-    for (let x = 0; x < BOARD_HEIGHT / TILE_SIZE; x++)
-    {
-      grid[x] = []
+    for (let x = 0; x < BOARD_HEIGHT / TILE_SIZE; x++) {
+      grid[x] = [];
       for (let y = 0; y < BOARD_WIDTH / TILE_SIZE; y++) {
-        grid[x][y] = false
+        grid[x][y] = false;
       }
     }
-    return grid
+    return grid;
   }
 
   getNextGrid() {
-    let newArray = []
+    let newArray = [];
 
     for (let i = 0; i < BOARD_HEIGHT / TILE_SIZE; i++) {
-      let row = []
+      let row = [];
       for (let j = 0; j < BOARD_WIDTH / TILE_SIZE; j++) {
-        row.push(this.willCellSurvive(this.state.grid, i, j) ? 1 : 0)
+        row.push(this.willCellSurvive(this.state.grid, i, j) ? 1 : 0);
       }
-      newArray.push(row)
+      newArray.push(row);
     }
-    return newArray
+    return newArray;
   }
 
   willCellSurvive(grid, x, y) {
-    let neighbors = 0
+    let neighbors = 0;
 
     /**
     * count living cells arond the targeted cell
     */
-    if (grid[mod(x + 1, BOARD_HEIGHT / TILE_SIZE)][y]) neighbors++
-    if (grid[mod(x + 1, BOARD_HEIGHT / TILE_SIZE)][mod(y + 1, BOARD_WIDTH / TILE_SIZE)]) neighbors++
-    if (grid[x][mod(y + 1, BOARD_WIDTH / TILE_SIZE)]) neighbors++
-    if (grid[x][mod(y - 1, BOARD_WIDTH / TILE_SIZE)]) neighbors++
-    if (grid[mod(x + 1, BOARD_HEIGHT / TILE_SIZE)][mod(y - 1, BOARD_WIDTH / TILE_SIZE)]) neighbors++
-    if (grid[mod(x - 1, BOARD_HEIGHT / TILE_SIZE)][y]) neighbors++
-    if (grid[mod(x - 1, BOARD_HEIGHT / TILE_SIZE)][mod(y - 1, BOARD_WIDTH / TILE_SIZE)]) neighbors++
-    if (grid[mod(x - 1, BOARD_HEIGHT / TILE_SIZE)][mod(y + 1, BOARD_WIDTH / TILE_SIZE)]) neighbors++
+    if (grid[mod(x + 1, BOARD_HEIGHT / TILE_SIZE)][y]) neighbors++;
+    if (grid[mod(x + 1, BOARD_HEIGHT / TILE_SIZE)][mod(y + 1, BOARD_WIDTH / TILE_SIZE)]) neighbors++;
+    if (grid[x][mod(y + 1, BOARD_WIDTH / TILE_SIZE)]) neighbors++;
+    if (grid[x][mod(y - 1, BOARD_WIDTH / TILE_SIZE)]) neighbors++;
+    if (grid[mod(x + 1, BOARD_HEIGHT / TILE_SIZE)][mod(y - 1, BOARD_WIDTH / TILE_SIZE)]) neighbors++;
+    if (grid[mod(x - 1, BOARD_HEIGHT / TILE_SIZE)][y]) neighbors++;
+    if (grid[mod(x - 1, BOARD_HEIGHT / TILE_SIZE)][mod(y - 1, BOARD_WIDTH / TILE_SIZE)]) neighbors++;
+    if (grid[mod(x - 1, BOARD_HEIGHT / TILE_SIZE)][mod(y + 1, BOARD_WIDTH / TILE_SIZE)]) neighbors++;
 
-    return (grid[x][y] && neighbors == 2 || neighbors == 3)
+    return (grid[x][y] && neighbors == 2 || neighbors == 3);
 
     function mod(x, m) {
-      m = Math.abs(m)
-      return (x % m + m) % m
+      m = Math.abs(m);
+      return (x % m + m) % m;
     }
   }
 
 /*----------------------------HANDLERS--------------------------------------*/
   handleTileTouch(x, y) {
-    let newArray = this.state.grid
+    let newArray = this.state.grid;
 
-    newArray[x][y] = !newArray[x][y]
-    this.setState({grid: newArray})
+    newArray[x][y] = !newArray[x][y];
+    this.setState({grid: newArray});
   }
 
   handleReset() {
-    this.setState({grid: this.getEmptyGrid()})
+    this.setState({ grid: this.getEmptyGrid() });
   }
 
   handleRandom() {
-    let newArray = []
+    let newArray = [];
 
-    for (let x = 0; x < BOARD_HEIGHT / TILE_SIZE; x++)
-    {
-      newArray[x] = []
+    for (let x = 0; x < BOARD_HEIGHT / TILE_SIZE; x++) {
+      newArray[x] = [];
       for (let y = 0; y < BOARD_WIDTH / TILE_SIZE; y++) {
-        newArray[x][y] = (Math.random() >= 0.80)
+        newArray[x][y] = (Math.random() >= 0.80);
       }
     }
 
-    this.setState({grid: newArray})
+    this.setState({ grid: newArray });
   }
 
   handleRun() {
-    if (!this.timer)
-    {
-      this.timer = setInterval(() => this.setState({grid: this.getNextGrid()}), 50)
+    if (!this.timer) {
+      this.timer = setInterval(() => this.setState({grid: this.getNextGrid()}), 50);
     }
   }
 
   handlePause() {
-    clearInterval(this.timer)
-    this.timer = null
+    clearInterval(this.timer);
+    this.timer = null;
   }
 
   render() {
     return (
-      <View style = {styles.container}>
-      <Board grid = {this.state.grid} handleTileTouch = {this.handleTileTouch}/>
-      <ToolsBar grid = {this.state.grid} handleReset = {this.handleReset} handleRandom = {this.handleRandom} handleRun = {this.handleRun} handlePause = {this.handlePause}/>
+      <View style={styles.container}>
+        <Board
+          grid={this.state.grid}
+          handleTileTouch={this.handleTileTouch}
+        />
+        <ToolsBar
+          grid={this.state.grid}
+          handleReset={this.handleReset}
+          handleRandom={this.handleRandom}
+          handleRun={this.handleRun}
+          handlePause={this.handlePause}
+        />
       </View>
-    )
+    );
   }
 }
 
@@ -334,7 +271,7 @@ const styles = StyleSheet.create({
   },
   toolText: {
     color: 'white',
-  }
-})
+  },
+});
 
-AppRegistry.registerComponent('Conways', () => Conways)
+AppRegistry.registerComponent('Conways', () => Conways);
