@@ -12,6 +12,8 @@ import {
   View,
   TouchableOpacity,
   Dimensions,
+  ScrollView,
+
 } from 'react-native';
 
 const TILE_SIZE = 20;
@@ -67,17 +69,19 @@ class Row extends Component {
 class Board extends Component {
   render() {
     return (
-      <View style = {styles.board}>
-        {
-          this.props.grid.map((element, index) =>
-            <Row
-              rowArr={element}
-              key={index}
-              x={index}
-              handleTileTouch={this.props.handleTileTouch}
-            />)
-        }
-      </View>
+      <ScrollView maximumZoomScale={3} minimumZoomScale={1}>
+        <View style = {styles.board}>
+          {
+            this.props.grid.map((element, index) =>
+              <Row
+                rowArr={element}
+                key={index}
+                x={index}
+                handleTileTouch={this.props.handleTileTouch}
+              />)
+          }
+        </View>
+      </ScrollView>
     );
   }
 }
